@@ -2,60 +2,67 @@
 //  app.js — Playlist Generator
 //  Main application logic
 //
-//  This file has two parts:
+//  PART 1 — 14 bugs are seeded in the working code.
+//           Each is labeled with a 🐛 comment. Fix them all.
+//    *TIP* - press command F to search for each bug
 //
-//  PART 1 — 15 bugs are seeded in the working code below.
-//           Each one is labeled with a 🐛 comment.
-//           Fix them all to get the app running.
-//
-//  PART 2 — 6 build tasks are stubbed out.
-//           Each one is labeled with a BUILD comment.
-//           Implement them to complete the app's features.
+//  PART 2 — 4 build tasks are stubbed out.
+//           Each is labeled with a BUILD comment.
+//           The Track class is pre-built in track.js — read it first.
 // ============================================================
 
 import Track from './track.js';
 
 // ── State ──────────────────────────────────────────────────
-
 // 🐛 BUG 1 — M1: Variables & Data Types
-// playlist is declared with const, but it needs to be reassigned later.
-// (e.g. playlist = data.results.map(...) in loadInitialPlaylist)
+// playlist needs to be reassigned later (e.g. playlist = data.results.map(...))
 // const does not allow reassignment. Fix the declaration keyword.
-const playlist   = [];
-let filterMode   = 'all';
-let playingId    = null;
+const playlist   = [];          // Array of Track instances
+let filterMode   = 'all';       // 'all' | 'favorites'
+
+
+// 🐛 BUG 13 — M2: Data Types (null vs number)
+// playingId should start as null (no track playing) but is initialized to 0.
+// Later code checks: if (playingId === null) — that check never passes with 0.
+// Fix: change 0 to null.
+let playingId    = 0;           // ID of currently previewing track
 
 // ── DOM References ─────────────────────────────────────────
-const trackList           = document.getElementById('trackList');
-const playlistEmpty       = document.getElementById('playlistEmpty');
-const trackCountEl        = document.getElementById('trackCount');
-const searchInput         = document.getElementById('searchInput');
-const searchBtn           = document.getElementById('searchBtn');
-const searchResults       = document.getElementById('searchResults');
-const playlistNameInput   = document.getElementById('playlistNameInput');
-const playlistNameWrap    = document.getElementById('playlistNameWrap');
+const trackList        = document.getElementById('trackList');
+const playlistEmpty    = document.getElementById('playlistEmpty');
+const trackCountEl     = document.getElementById('trackCount');
+const searchInput      = document.getElementById('searchInput');
+const searchBtn        = document.getElementById('searchBtn');
+const searchResults    = document.getElementById('searchResults');
+const playlistNameInput= document.getElementById('playlistNameInput');
+const playlistNameWrap = document.getElementById('playlistNameWrap');
 const playlistNameConfirm = document.getElementById('playlistNameConfirm');
-const savePlaylistBtn     = document.getElementById('savePlaylistBtn');
-const filterBtns          = document.querySelectorAll('.filter-btn');
+const savePlaylistBtn  = document.getElementById('savePlaylistBtn');
+const filterBtns       = document.querySelectorAll('.filter-btn');
 
 // Preview player elements
-const previewPlayer       = document.getElementById('previewPlayer');
-const previewAudio        = document.getElementById('previewAudio');
-const previewArt          = document.getElementById('previewArt');
-const previewTitle        = document.getElementById('previewTitle');
-const previewArtist       = document.getElementById('previewArtist');
-const previewTime         = document.getElementById('previewTime');
+const previewPlayer    = document.getElementById('previewPlayer');
+const previewAudio     = document.getElementById('previewAudio');
+const previewArt       = document.getElementById('previewArt');
+const previewTitle     = document.getElementById('previewTitle');
+const previewArtist    = document.getElementById('previewArtist');
+const previewTime      = document.getElementById('previewTime');
 const previewProgressFill = document.getElementById('previewProgressFill');
-const previewClose        = document.getElementById('previewClose');
+const previewClose     = document.getElementById('previewClose');
 
 // ── Render Playlist ────────────────────────────────────────
 
+/**
+ * Renders the current playlist array to the DOM.
+ * Applies the active filter (all vs favorites).
+ * @param {Track[]} tracks - Array of Track instances to render
+ */
 function renderPlaylist(tracks) {
-  // 🐛 BUG 11 — M5: Array Functionality
-  // The .filter() condition is inverted — it returns tracks where
-  // isFavorite is FALSE when filtering for favorites.
-  // Fix the condition to return tracks where isFavorite IS true.
   const filtered = filterMode === 'favorites'
+
+    // 🐛 BUG 9 — M5: Array Functionality
+    // The .filter() condition is inverted — returns tracks where
+    // isFavorite is false instead of true. Fix the condition.
     ? tracks.filter(t => !t.isFavorite)
     : tracks;
 
@@ -68,35 +75,45 @@ function renderPlaylist(tracks) {
   } else {
     playlistEmpty.style.display = 'none';
     trackList.innerHTML = filtered.map((track, index) => {
-      // 🐛 BUG 9 — M4: String Methods / Template Literals
-      // The img tag string uses single quotes instead of backticks.
-      // This means ${track.artwork} and ${track.title} render as
-      // literal text, not variable values. Fix the quote style.
       const artEl = track.artwork
+
+        // 🐛 BUG 7 — M4: String Methods / Template Literals
+        // Single quotes are used instead of backticks.
+        // ${track.artwork} and ${track.title} render as literal text.
+        // Fix the quote style to use a template literal.
+        // You should see the ${} become a different color
+        // Once changes are saved, the track images should display
         ? '<img class="track-art" src="${track.artwork}" alt="${track.title}" loading="lazy" />'
         : `<div class="track-art-placeholder">♪</div>`;
 
-      const favClass = track.isFavorite ? ' favorite' : '';
+      // 🐛 BUG 4 — M1: Variables (var / scope)
+      // var is used here instead of a block-scoped keyword.
+      // Replace var with the correct declaration.
+      var favClass = track.isFavorite ? ' favorite' : '';
 
       // 🐛 BUG 5 — M8: Operators, Expressions & Conditionals
-      // The condition below uses = (assignment) instead of === (comparison).
-      // This assigns true to track.isFavorite rather than checking its value,
-      // so favTitle is always 'Remove from favorites' regardless of actual state.
-      // Fix the operator so it compares instead of assigns.
+      // = (assignment) is used instead of === (comparison).
+      // This assigns true to track.isFavorite rather than checking it.
+      // Fix the operator.
       const favTitle = (track.isFavorite = true) ? 'Remove from favorites' : 'Add to favorites';
       const realIndex = playlist.indexOf(track);
 
-      // 🐛 BUG 12 — M6: Object Functionality / Dot Notation
-      // track.trackName does not exist on a Track instance.
-      // The Track class stores the song title under a different property name.
-      // Fix the property name to match what the Track constructor sets.
-      return `
+      // 🐛 BUG 3 — M5: Array / Map
+      // This .map() callback uses a {} block body but has no return keyword.
+      // Without return, every iteration produces undefined — the list renders blank.
+      // Fix: add return before the opening backtick of the template literal below.
+      // *TIP* -- make sure the return keyword is on the same line as the opening backtick
+      // Save your changes and you should see data show up on the page
+      `
         <li class="track-card${favClass}"
             draggable="true"
             data-index="${realIndex}"
             data-id="${track.id}">
           ${artEl}
           <div class="track-info">
+            <!-- 🐛 BUG 6 — M6: Object Functionality / Dot Notation          -->
+            <!-- track.trackName does not exist on a Track instance.           -->
+            <!-- Fix the property name to match what the constructor stores.   -->
             <div class="track-title">${track.trackName}</div>
             <div class="track-artist">${track.artist}</div>
           </div>
@@ -110,6 +127,9 @@ function renderPlaylist(tracks) {
           </div>
         </li>`;
     }).join('');
+    // .map() returns an array of HTML strings — one per track.
+    // .join('') collapses that array into a single string with no separator.
+    // Assigning it to innerHTML replaces the entire list in one go.
 
     updateTrackCount();
     setupDragAndDrop();
@@ -119,77 +139,76 @@ function renderPlaylist(tracks) {
   notifySidebar();
 }
 
-// ── BUILD 2: renderPlaylist() ───────────────────────────────
-// ⚠️  The renderPlaylist() function above has Bug 9, Bug 11,
-//    and Bug 12 in it. Fix those bugs first.
-//    Then, as part of Build 2, expand the card HTML to include
-//    all track fields properly. See the Notion page for details.
-
-
 // ── Add & Remove Tracks ────────────────────────────────────
 
-// ── BUILD 3A: addTrack(trackData) ──────────────────────────
-//
-// This function should:
-//   1. Check if the track is already in the playlist
-//      (compare trackData.trackId against each track.id using .some())
-//   2. If already there: call showToast('Already in playlist!') and return
-//   3. Otherwise: create new Track(trackData), push to playlist, re-render
-//
-// See the Notion assignment page for full instructions and code snippets.
-
+/**
+ * Creates a new Track from raw iTunes data and adds it to the playlist.
+ * Prevents duplicate tracks by trackId.
+ * @param {Object} trackData - Raw iTunes API result object
+ */
+// ── BUILD 2A: addTrack(trackData) ──────────────────────────
+// 1. Check for duplicates using .some()
+// 2. If duplicate: call showToast('Already in playlist!') and return
+// 3. Create new Track(trackData), push to playlist, call renderPlaylist(playlist)
+// See Notion for full instructions and code snippets.
 function addTrack(trackData) {
   // Your code here
 }
 
-// ── BUILD 3B: removeTrack(index) ───────────────────────────
-//
-// This function should:
-//   1. Validate the index (guard against negative or out-of-bounds)
-//   2. Use .splice(index, 1) to remove the track from playlist
-//   3. Call renderPlaylist(playlist) to update the display
-//
-// See the Notion assignment page for full instructions and code snippets.
-
+/**
+ * Removes the track at the given index from the playlist.
+ * @param {number} index - Index in the playlist array
+ */
+// ── BUILD 2B: removeTrack(index) ───────────────────────────
+// 1. Validate the index
+// 2. Use .splice(index, 1) to remove the track
+// 3. Call renderPlaylist(playlist)
+// See Notion for full instructions and code snippets.
 function removeTrack(index) {
   // Your code here
 }
 
 // ── Favorite Toggle ────────────────────────────────────────
 
-// ── BUILD 4A: toggleFavorite(index) ────────────────────────
-//
-// This function should:
-//   1. Validate the index
-//   2. Call playlist[index].toggleFavorite() — the method you wrote in Build 1
-//   3. Call renderPlaylist(playlist) to update the display
-
+/**
+ * Toggles the favorite state of a track at the given index.
+ * @param {number} index - Index in the playlist array
+ */
+// ── BUILD 3A: toggleFavorite(index) ────────────────────────
+// 1. Validate the index
+// 2. Call playlist[index].toggleFavorite()
+// 3. Call renderPlaylist(playlist)
+// See Notion for full instructions.
 function toggleFavorite(index) {
   // Your code here
 }
 
 // ── Filter ─────────────────────────────────────────────────
 
-// ── BUILD 4B: filterPlaylist(mode) ─────────────────────────
-//
-// This function should:
-//   1. Set the filterMode variable to the mode parameter
-//   2. Use if/else: if mode === 'favorites', filter with .filter(t => t.isFavorite)
-//   3. Update the active CSS class on the filter buttons
-//   4. Call renderPlaylist() with the filtered result
-
+/**
+ * Sets the filter mode and re-renders the playlist.
+ * @param {string} mode - 'all' or 'favorites'
+ */
+// ── BUILD 3B: filterPlaylist(mode) ─────────────────────────
+// 1. Set filterMode = mode
+// 2. Use if/else: if 'favorites', filter with .filter(t => t.isFavorite)
+// 3. Update active class on filter buttons
+// 4. Call renderPlaylist() with the result
+// See Notion for full instructions and code snippets.
 function filterPlaylist(mode) {
   // Your code here
 }
 
 // ── Search & Fetch ─────────────────────────────────────────
 
-// ── BUILD 6: searchSongs(query) ────────────────────────────
-//
-// Async function that fetches from the iTunes Search API.
-// Read the Notion assignment page for full instructions.
-// The try/catch and loading state are stubbed — fill in the middle.
-
+/**
+ * Fetches songs from the iTunes Search API for a given query.
+ * Maps results to Track instances and renders them in the search panel.
+ * @param {string} query - The search string entered by the user
+ */
+// ── BUILD 4: searchSongs(query) ────────────────────────────
+// Fill in the 5 steps inside the try block below.
+// See the Build 4 section in playlist-generator.md for full instructions.
 async function searchSongs(query) {
   if (!query.trim()) return;
 
@@ -208,7 +227,7 @@ async function searchSongs(query) {
 
     // Step 4: Map results to Track instances
 
-    // Step 5: Render search results
+    // Step 5: Call renderSearchResults(results)
 
   } catch (error) {
     searchResults.innerHTML = `<p class="empty-state">Search failed. Check your internet connection.</p>`;
@@ -218,54 +237,41 @@ async function searchSongs(query) {
   }
 }
 
-// ── Render Search Results ──────────────────────────────────
-// ✅ This function is complete — do not modify it.
-
+/**
+ * Renders an array of Track instances into the search results panel.
+ * @param {Track[]} results
+ */
 function renderSearchResults(results) {
-  const currentIds = new Set(playlist.map(t => String(t.id)));
+  // 🐛 BUG 10 — M5: Array / Map
+  // The .map() callback below does not return anything.
+  // This produces an array of undefined instead of IDs.
+  // Fix the callback so it returns t.id.
+  const currentIds = new Set(playlist.map(t => { t.id; }));
 
   searchResults.innerHTML = results.map(track => {
-    // 🐛 BUG 14 — M7: Optional Chaining
-    // track.artwork can be an empty string or undefined for some results.
-    // Accessing a property on undefined crashes the app.
-    // The line below needs optional chaining (?.) to be safe.
-    // Fix: track.artwork?.toString() — or simply ensure the check below
-    // uses track.artwork with optional chaining where needed.
-    // ACTUAL BUG: artworkUrl100 from iTunes is a plain string, not an object.
-    // The issue is that for some tracks, artwork is undefined/null, and the
-    // truthy check is correct — but the src attribute below tries
-    // track.artwork without guarding. Use optional chaining on the src:
     const artEl = track.artwork
-      ? `<img class="track-art" src="${track.artwork}" alt="${track.title}" loading="lazy" />`
+
+      // 🐛 BUG 11 — M6: Object / Dot Notation
+      // track.artwork is already the URL string — it has no .url property.
+      // Appending .url produces undefined, so every artwork image breaks.
+      // Fix: remove .url and use track.artwork directly.
+      ? `<img class="track-art" src="${track.artwork.url}" alt="${track.title}" loading="lazy" />`
       : `<div class="track-art-placeholder">♪</div>`;
 
-    // 🐛 BUG 13 — M6: Dot vs Bracket Notation
-    // "prop" is a variable holding the string 'id'.
-    // track.prop looks for a literal property named "prop" — it doesn't exist.
-    // Use bracket notation: track[prop] — to access the property dynamically.
-    const prop = 'id';
-    const alreadyAdded = currentIds.has(String(track.prop));
-
-    // 🐛 BUG 2 — M1: Variables (var / scope)
-    // "var" is used below. var is function-scoped, not block-scoped.
-    // This can cause unexpected behavior in loops and callbacks.
-    // Replace var with the correct block-scoped declaration keyword.
-    var displayTitle = track.title || 'Unknown Title';
+    const alreadyAdded = currentIds.has(track.id);
 
     return `
       <li class="track-card" data-id="${track.id}">
         ${artEl}
         <div class="track-info">
-          <div class="track-title">${displayTitle}</div>
+          <div class="track-title">${track.title}</div>
           <div class="track-artist">${track.artist}</div>
         </div>
         <span class="track-duration">${track.getFormattedDuration()}</span>
         <div class="track-actions">
           ${track.previewUrl
-      ? `<button class="track-btn track-preview-btn"
-                data-preview="${track.previewUrl}"
-                data-title="${track.title}"
-                data-artist="${track.artist}"
+      ? `<button class="track-btn track-preview-btn" data-preview="${track.previewUrl}"
+                data-title="${track.title}" data-artist="${track.artist}"
                 data-art="${track.artwork}" title="Preview">▶</button>`
       : ''}
           <button class="track-add-btn"
@@ -288,60 +294,31 @@ function renderSearchResults(results) {
 }
 
 // ── Load Initial Playlist ──────────────────────────────────
-// ✅ This function loads the default lofi playlist on startup.
-//    Bugs 3, 4, 6, 7, 8, and 10 live here.
-//    Fixing them will make the initial playlist appear.
 
+/**
+ * Fetches a default set of lofi songs from iTunes to pre-populate
+ * the playlist on first load.
+ */
 async function loadInitialPlaylist() {
   try {
-    // 🐛 BUG 6 — M3: Functions (missing return value)
-    // buildUrl() computes the correct URL but never returns it.
-    // The caller gets undefined. Add a return statement.
-    function buildUrl(term) {
-      const base = 'https://itunes.apple.com/search';
-      `${base}?term=${term}&entity=song&limit=8&media=music`;
-    }
-    const url = buildUrl('lofi+hip+hop');
-
+    const url = `https://itunes.apple.com/search?term=lofi+hip+hop&entity=song&limit=8&media=music`;
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
+    // 🐛 BUG 8 — M2: Data Structures & Collections
+    // The condition uses || (or) instead of && (and).
+    // This means the block runs even when data.results is undefined,
+    // causing a crash. Fix the logical operator.
+    if (data.results || data.results.length > 0) {
 
-      // 🐛 BUG 8 — M3: Functions (arrow function missing parameter)
+      // 🐛 BUG 2 — M3: Functions (arrow function missing parameter)
+      // ** You should notice an error in your browser console **
+
       // The .map() callback is missing its parameter.
-      // "item" is referenced inside but never declared.
-      // Add the parameter to the arrow function: (item) => ...
+      // 'item' is used inside but never declared.
+      // Add the parameter to the arrow function.
+      // This should remove the error in your browser console once you save the changes
       playlist = data.results.map(() => new Track(item));
-
-      // 🐛 BUG 10 — M5: Array / Map
-      // The .map() callback below does not return anything.
-      // This produces an array of undefined values.
-      // Fix it so it returns the result of formatDuration().
-      const durations = playlist.map(track => {
-        // 🐛 BUG 7 — M3: Functions (wrong argument order)
-        // formatDuration(seconds, label) expects seconds first.
-        // The call below passes the arguments in the wrong order.
-        // Fix the order to match the function signature.
-        formatDuration(track.title, track.duration);
-      });
-      console.log('Durations:', durations);
-
-      // 🐛 BUG 3 — M1: Data Types
-      // defaultDuration is stored as a string '180', not a number.
-      // When you do math on a string, you get unexpected results.
-      // Remove the quotes to make it a number.
-      const defaultDuration = '180';
-      console.log('Default in minutes:', defaultDuration / 60);
-
-      // 🐛 BUG 4 — M2: Data Types (loose vs strict equality)
-      // The null check below uses == instead of ===.
-      // == (loose equality) also matches undefined, 0, false, ''.
-      // Use === (strict equality) to check for exactly null.
-      if (data.results[0].artworkUrl100 == null) {
-        console.log('First result has no artwork');
-      }
-
       renderPlaylist(playlist);
     }
   } catch (error) {
@@ -350,30 +327,15 @@ async function loadInitialPlaylist() {
   }
 }
 
-// ── Utility: formatDuration ────────────────────────────────
-
-function formatDuration(seconds, label) {
-  const mins   = Math.floor(seconds / 60);
-  const secs   = seconds % 60;
-  const padded = secs < 10 ? `0${secs}` : `${secs}`;
-  return `${mins}:${padded}`;
-}
-
-// ── Loops Bug ──────────────────────────────────────────────
-
-// 🐛 BUG 15 — M9: Loops
-// This loop uses <= instead of <.
-// When i equals tracks.length, tracks[i] is undefined and crashes.
-// Fix the loop condition.
-function logTrackTitles(tracks) {
-  for (let i = 0; i <= tracks.length; i++) {
-    console.log(tracks[i].title);
-  }
-}
-
 // ── Preview Player ─────────────────────────────────────────
-// ✅ Pre-built — do not modify.
 
+/**
+ * Plays a 30-second iTunes preview clip.
+ * @param {string} url - The preview audio URL
+ * @param {string} title - Track title
+ * @param {string} artist - Artist name
+ * @param {string} art - Artwork URL
+ */
 function playPreview(url, title, artist, art) {
   previewAudio.src = url;
   previewTitle.textContent = title;
@@ -390,6 +352,7 @@ function stopPreview() {
   previewProgressFill.style.width = '0%';
   previewTime.textContent = '0:00';
   playingId = null;
+  // Reset all preview buttons back to ▶
   trackList.querySelectorAll('.track-preview-btn').forEach(b => b.textContent = '▶');
 }
 
@@ -405,8 +368,7 @@ previewAudio.addEventListener('timeupdate', () => {
 previewAudio.addEventListener('ended', stopPreview);
 previewClose.addEventListener('click', stopPreview);
 
-// ── Drag & Drop ────────────────────────────────────────────
-// ✅ Pre-built — do not modify.
+// ── Drag & Drop (pre-built) ────────────────────────────────
 
 function setupDragAndDrop() {
   const items = trackList.querySelectorAll('.track-card');
@@ -418,20 +380,24 @@ function setupDragAndDrop() {
       item.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
     });
+
     item.addEventListener('dragend', () => {
       item.classList.remove('dragging');
       trackList.querySelectorAll('.track-card').forEach(c => c.classList.remove('drag-over'));
     });
+
     item.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       trackList.querySelectorAll('.track-card').forEach(c => c.classList.remove('drag-over'));
       item.classList.add('drag-over');
     });
+
     item.addEventListener('drop', e => {
       e.preventDefault();
       const targetIndex = parseInt(item.dataset.index);
       if (draggedIndex === null || draggedIndex === targetIndex) return;
+
       const moved = playlist.splice(draggedIndex, 1)[0];
       playlist.splice(targetIndex, 0, moved);
       draggedIndex = null;
@@ -441,7 +407,6 @@ function setupDragAndDrop() {
 }
 
 // ── Utility ────────────────────────────────────────────────
-// ✅ Pre-built — do not modify.
 
 function updateTrackCount() {
   const count = playlist.length;
@@ -476,6 +441,7 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 2000);
 }
 
+// Expose getPlaylistState so sidebar.js can read current state
 function getPlaylistState() {
   return {
     name: playlistNameInput.value.trim() || 'Untitled Playlist',
@@ -486,12 +452,17 @@ function getPlaylistState() {
       collectionName: t.album,
       artworkUrl100: t.artwork,
       previewUrl: t.previewUrl,
-      trackTimeMillis: t.duration * 1000,
+
+      // 🐛 BUG 12 — M1: Data Types
+      // '1000' is a string, not a number. Multiplying by a string
+      // produces unexpected results. Remove the quotes.
+      trackTimeMillis: t.duration * '1000',
       isFavorite: t.isFavorite
     }))
   };
 }
 
+// Load a saved playlist (called by sidebar.js)
 function loadPlaylistState(state) {
   playlistNameInput.value = state.name || 'Untitled Playlist';
   playlist = state.tracks.map(raw => {
@@ -507,18 +478,30 @@ function notifySidebar() {
   window.dispatchEvent(new CustomEvent('playlistUpdated'));
 }
 
-// ── Event Listeners ────────────────────────────────────────
-// ✅ Pre-built — do not modify.
+// 🐛 BUG 14 — M9: Loops
+// This loop uses <= instead of <.
+// When i equals tracks.length, tracks[i] is undefined and crashes.
+// Fix the loop condition.
+function logTrackTitles(tracks) {
+  for (let i = 0; i <= tracks.length; i++) {
+    console.log(tracks[i].title);
+  }
+}
 
+// ── Event Listeners ────────────────────────────────────────
+
+// Search
 searchBtn.addEventListener('click', () => searchSongs(searchInput.value));
 searchInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') searchSongs(searchInput.value);
 });
 
+// Filter buttons
 filterBtns.forEach(btn => {
   btn.addEventListener('click', () => filterPlaylist(btn.dataset.filter));
 });
 
+// Playlist track-list: delegated events
 trackList.addEventListener('click', e => {
   const favBtn     = e.target.closest('.track-fav-btn');
   const removeBtn  = e.target.closest('.track-remove-btn');
@@ -527,20 +510,23 @@ trackList.addEventListener('click', e => {
   if (favBtn)    toggleFavorite(parseInt(favBtn.dataset.index));
   if (removeBtn) removeTrack(parseInt(removeBtn.dataset.index));
   if (previewBtn) {
-    const idx   = parseInt(previewBtn.dataset.index);
+    const idx = parseInt(previewBtn.dataset.index);
     const track = playlist[idx];
     if (!track?.previewUrl) return;
+    // Toggle play/pause if same track
     if (playingId === track.id) {
       stopPreview();
     } else {
       playingId = track.id;
       playPreview(track.previewUrl, track.title, track.artist, track.artwork);
+      // Update button icon
       trackList.querySelectorAll('.track-preview-btn').forEach(b => b.textContent = '▶');
       previewBtn.textContent = '⏸';
     }
   }
 });
 
+// Search results: delegated events
 searchResults.addEventListener('click', e => {
   const addBtn     = e.target.closest('.track-add-btn');
   const previewBtn = e.target.closest('.track-preview-btn');
@@ -563,10 +549,7 @@ searchResults.addEventListener('click', e => {
   }
 });
 
-document.getElementById('sidebarToggle').addEventListener('click', () => {
-  document.getElementById('sidebar').classList.toggle('collapsed');
-});
-
+// Playlist name editing UX
 playlistNameInput.addEventListener('focus', () => {
   playlistNameWrap.classList.add('editing');
 });
@@ -579,12 +562,20 @@ function confirmPlaylistName() {
 playlistNameConfirm.addEventListener('click', confirmPlaylistName);
 playlistNameInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') confirmPlaylistName();
-  if (e.key === 'Escape') confirmPlaylistName();
+  if (e.key === 'Escape') {
+    confirmPlaylistName();
+  }
 });
 
+// Save Playlist button — delegates to sidebar.js via a custom event
 savePlaylistBtn.addEventListener('click', () => {
   window.dispatchEvent(new CustomEvent('savePlaylistRequested'));
   showToast('Playlist saved!');
+});
+
+// Sidebar toggle
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('collapsed');
 });
 
 // ── Expose globals for sidebar.js ──────────────────────────

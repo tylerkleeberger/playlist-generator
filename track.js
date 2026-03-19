@@ -6,11 +6,12 @@
 //  in this app will be created as a Track instance using
 //  this class as the template.
 //
-//  ⚠️  Notice: there is no "export default" on this class yet.
-//      That is intentional — you will add it in Build 5.
+//  This class is already built and working — your job in
+//  Build 1 is to read each section carefully and understand
+//  what it does before moving on to the build tasks in app.js.
 // ============================================================
 
-class Track {
+export default class Track {
   // ── BUILD 1A: Constructor ───────────────────────────────
   //
   // The constructor runs automatically every time a new Track
@@ -29,28 +30,20 @@ class Track {
   //     trackTimeMillis: 214000       ← milliseconds!
   //   }
   //
-  // Your job: read each field from data and store it on "this"
-  // so the rest of the app can use it.
+  // Each field from data is stored on "this" so the rest of
+  // the app can access it as track.title, track.artist, etc.
 
   constructor(data) {
-    // Set this.id to data.trackId
-    // (fall back to Math.random() if trackId is missing)
-
-    // Set this.title to data.trackName
-
-    // Set this.artist to data.artistName
-
-    // Set this.album to data.collectionName
-
-    // Set this.artwork to data.artworkUrl100
-
-    // Set this.previewUrl to data.previewUrl
-
-    // Set this.duration to data.trackTimeMillis converted from
-    // milliseconds to seconds. Use Math.floor() to round down.
-    // Formula: Math.floor(data.trackTimeMillis / 1000)
-
-    // Set this.isFavorite to false (always starts as not favorited)
+    this.id         = data.trackId || Math.random();
+    this.title      = data.trackName;
+    this.artist     = data.artistName;
+    this.album      = data.collectionName;
+    this.artwork    = data.artworkUrl100;
+    this.previewUrl = data.previewUrl;
+    // trackTimeMillis is in milliseconds — divide by 1000 for seconds
+    this.duration   = Math.floor(data.trackTimeMillis / 1000);
+    // Every track starts as not favorited
+    this.isFavorite = false;
   }
 
   // ── BUILD 1B: toggleFavorite() ──────────────────────────
@@ -62,7 +55,7 @@ class Track {
   // Hint: this.isFavorite = !this.isFavorite
 
   toggleFavorite() {
-    // Flip this.isFavorite
+    this.isFavorite = !this.isFavorite;
   }
 
   // ── BUILD 1C: getFormattedDuration() ───────────────────
@@ -78,12 +71,9 @@ class Track {
   //   4. Return the string using a template literal: `${minutes}:${paddedSeconds}`
 
   getFormattedDuration() {
-    // Step 1: calculate minutes
-
-    // Step 2: calculate remaining seconds
-
-    // Step 3: pad seconds if needed (if seconds < 10, add "0" in front)
-
-    // Step 4: return the formatted string
+    const minutes = Math.floor(this.duration / 60);
+    const seconds = this.duration % 60;
+    const paddedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+    return `${minutes}:${paddedSeconds}`;
   }
 }
